@@ -11,6 +11,10 @@ class Flashcard:
         self.ease_factor = ease_factor
         self.incorrect_attempts = incorrect_attempts
 
+    def edit_card(self, new_question, new_answer):
+        self.question = new_question
+        self.answer = new_answer
+
 
 class Deck:
     def __init__(self, name):
@@ -79,12 +83,12 @@ class Deck:
 card1 = Flashcard("What is the capital of France?", "Paris")
 card2 = Flashcard("What is your name?", "ZQ")
 
-# Create a deck
-my_deck = Deck("Test deck")
+# # Create a deck
+# my_deck = Deck("Test deck")
 
-# Add cards to deck
-my_deck.add_card(card1)
-my_deck.add_card(card2)
+# # Add cards to deck
+# my_deck.add_card(card1)
+# my_deck.add_card(card2)
 
-# Review deck
-my_deck.review()
+# # Review deck
+# my_deck.review()
