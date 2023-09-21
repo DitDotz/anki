@@ -61,6 +61,7 @@ class Deck:
 
                 if card.current_incorrect_attempts >= 1:
                     card.correct_attempts += 1
+                    card.ease_factor -= 0.1
                     card.interval *= (
                         card.ease_factor
                     )  # Decrease the interval for incorrect answers
