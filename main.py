@@ -4,18 +4,18 @@ import sqlite3
 
 class Card:
 
-    def __init__(self, question, answer, interval=1, ease_factor=2.5):
-        self.card_id = None # Instantiate after saving
-        self.deck_id = None # Instantiate after saving
+    def __init__(self, question, answer, card_id = None, deck_id=None, interval=1, ease_factor=2.5, correct_attempts=0, due_date=None, last_review_date=None, review_attempts=0):
+        self.card_id = card_id # Instantiate after saving
+        self.deck_id = deck_id # Instantiate after saving
         self.question = question
         self.answer = answer
         self.interval = interval
         self.ease_factor = ease_factor
-        self.correct_attempts = 0
+        self.correct_attempts = correct_attempts
         self.current_incorrect_attempts = 0
         self.due_date = datetime.date.today()  # Initial due date (today)
-        self.last_review_date = None  # Last review date
-        self.review_attempts = 0  # Total review attempts
+        self.last_review_date = last_review_date  # Last review date
+        self.review_attempts = review_attempts  # Total review attempts
 
     def save(self):
         conn = sqlite3.connect("flashcards.db")
@@ -133,26 +133,31 @@ def load_deck(deck_id):
     # Create Card objects for the fetched rows with card_id attribute
     cards = []
     for row in rows:
-        card = Card(row[0], row[1], row[2], row[3], row[4], row[5])
-        card.correct_attempts = row[6]
+        card = Card(row[1], row[2], row[0], row[3]) # card_id, question, answer, deck_id
+        card.interval = row[4]
+        card.ease_factor=row[5]
+        card.correct_attempts=row[6]
         card.due_date = datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[7] else None
-        card.last_review_date = datetime.datetime.strptime(row[8], "%Y-%m-%d").date() if row[8] else None
+        card.last_review_date = datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[8] else None
         card.review_attempts = row[9]
         cards.append(card)
     conn.close()
     deck.cards = cards  # Store the loaded cards in the deck
     return deck
 
-# Create a deck
-my_deck = Deck("Test deck")
-my_deck.save()
-# Deck has to be created before adding cards to it.
-# Create cards
-card1 = Card("What is the capital of France?", "Paris")
-card2 = Card("What is your name?", "ZQ")
-# Add cards to deck
-my_deck.add_card(card1)
-my_deck.add_card(card2)
-# Save cards
-card1.save()
-card2.save()
+# # Create a deck
+# my_deck = Deck("Test deck")
+# my_deck.save()
+# # Deck has to be created before adding cards to it.
+# # Create cards
+# card1 = Card("What is the capital of France?", "Paris")
+# card2 = Card("What is your name?", "ZQ")
+# # Add cards to deck
+# my_deck.add_card(card1)
+# my_deck.add_card(card2)
+# # Save cards
+# card1.save()
+# card2.save()
+
+deck = load_deck(1)
+deck.review()
