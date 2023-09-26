@@ -1,15 +1,14 @@
 import random
 import datetime
+import sqlite3
 
 class Card:
-    card_counter = 1  # Class-level counter for generating unique card IDs
 
     def __init__(self, question, answer, interval=1, ease_factor=2.5):
-        self.card_id = Card.card_counter  # Unique identifier for the card
-
+        self.card_id = None # Instantiate after saving
+        self.deck_id = None # Instantiate after saving
         self.question = question
         self.answer = answer
-        self.deck_name = None  # Initialize deck_name as None
         self.interval = interval
         self.ease_factor = ease_factor
         self.correct_attempts = 0
@@ -17,23 +16,30 @@ class Card:
         self.due_date = datetime.date.today()  # Initial due date (today)
         self.last_review_date = None  # Last review date
         self.review_attempts = 0  # Total review attempts
-        Card.card_counter +=1
 
-    def edit_card(self, new_question, new_answer):
+    def save(self):
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO cards (question, answer, deck_id, interval, ease_factor, correct_attempts, due_date, last_review_date, review_attempts)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (self.question, self.answer, self.deck_id, self.interval, self.ease_factor, self.correct_attempts, self.due_date, self.last_review_date, self.review_attempts))
+        self.card_id = cursor.lastrowid  # Get the ID of the inserted deck
+        conn.commit()
+        conn.close()
+
+    def edit_card(self, new_question, new_answer): # Change to SQL implementation
         self.question = new_question
         self.answer = new_answer
 
 class Deck:
-    deck_counter = 1 # Class-level counter for generating unique deck IDs
-
-    def __init__(self, name=None):
+    def __init__(self, name):
         self.name = name
+        self.id = None  # The deck ID will be set after saving
         self.cards = []
-        self.deck_id = Deck.deck_counter
-        Deck.deck_counter += 1  # Increment the deck ID counter
 
     def add_card(self, card):
-        card.deck_name = self.name  # Set the deck_name attribute in the Card class
+        card.deck_id = self.id  # Set the deck_name attribute in the Card class
         self.cards.append(card)
 
     def remove_card(self, card):
@@ -41,6 +47,14 @@ class Deck:
             self.cards.remove(card)
         else:
             print("Card not found in the deck.")
+
+    def save(self):
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO decks (name) VALUES (?)", (self.name,))
+        self.id = cursor.lastrowid  # Get the ID of the inserted deck
+        conn.commit()
+        conn.close()
 
     def list_cards(self):
         for i, card in enumerate(self.cards, 1):
@@ -99,17 +113,18 @@ class Deck:
 
         print(f"You have completed today's review")
 
+# Create a deck
+my_deck = Deck("Test deck")
+my_deck.save()
 
+
+# Deck has to be created before adding cards to it.
 # Create cards
 card1 = Card("What is the capital of France?", "Paris")
 card2 = Card("What is your name?", "ZQ")
-
-# Create a deck
-my_deck = Deck("Test deck")
+card1.save()
+card2.save()
 
 # Add cards to deck
 my_deck.add_card(card1)
 my_deck.add_card(card2)
-
-# Review deck
-my_deck.review()
