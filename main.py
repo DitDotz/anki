@@ -141,44 +141,44 @@ class Deck:
 
         print(f"You have completed today's review")
 
+    @classmethod
+    def load_deck(cls, deck_id):
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
 
-def load_deck(deck_id):
-    conn = sqlite3.connect("flashcards.db")
-    cursor = conn.cursor()
+        # Execute the SQL query to select deck name
+        cursor.execute("SELECT name FROM decks WHERE id = ?", (deck_id,))
+        deck_name = cursor.fetchone()[0]
 
-    # Execute the SQL query to select deck name
-    cursor.execute("SELECT name FROM decks WHERE id = ?", (deck_id,))
-    deck_name = cursor.fetchone()[0]
+        # Create a new Deck instance with the fetched deck name
+        deck = Deck(deck_name)
 
-    # Create a new Deck instance with the fetched deck name
-    deck = Deck(deck_name)
+        # Execute the SQL query to select cards for the specified deck ID
+        cursor.execute("SELECT * FROM cards WHERE deck_id = ?", (deck_id,))
 
-    # Execute the SQL query to select cards for the specified deck ID
-    cursor.execute("SELECT * FROM cards WHERE deck_id = ?", (deck_id,))
+        # Fetch all matching rows
+        rows = cursor.fetchall()
 
-    # Fetch all matching rows
-    rows = cursor.fetchall()
-
-    # Create Card objects for the fetched rows with card_id attribute
-    cards = []
-    for row in rows:
-        card = Card(
-            row[1], row[2], row[0], row[3]
-        )  # card_id, question, answer, deck_id
-        card.interval = row[4]
-        card.ease_factor = row[5]
-        card.correct_attempts = row[6]
-        card.due_date = (
-            datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[7] else None
-        )
-        card.last_review_date = (
-            datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[8] else None
-        )
-        card.review_attempts = row[9]
-        cards.append(card)
-    conn.close()
-    deck.cards = cards  # Store the loaded cards in the deck
-    return deck
+        # Create Card objects for the fetched rows with card_id attribute
+        cards = []
+        for row in rows:
+            card = Card(
+                row[1], row[2], row[0], row[3]
+            )  # card_id, question, answer, deck_id
+            card.interval = row[4]
+            card.ease_factor = row[5]
+            card.correct_attempts = row[6]
+            card.due_date = (
+                datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[7] else None
+            )
+            card.last_review_date = (
+                datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[8] else None
+            )
+            card.review_attempts = row[9]
+            cards.append(card)
+        conn.close()
+        deck.cards = cards  # Store the loaded cards in the deck
+        return deck
 
 
 # # Create a deck
@@ -195,5 +195,5 @@ def load_deck(deck_id):
 # card1.save()
 # card2.save()
 
-deck = load_deck(1)
+deck = Deck.load_deck(1)
 deck.review()
