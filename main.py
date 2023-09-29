@@ -82,6 +82,13 @@ class Deck:
         card.deck_id = self.id
         self.cards.append(card)
 
+        # Update the card's deck_id in the SQLite database
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
+        cursor.execute("UPDATE cards SET deck_id = ? WHERE id = ?", (card.deck_id, card.card_id))
+        conn.commit()
+        conn.close()
+
     def remove_card(self, card):
         if card in self.cards:
             self.cards.remove(card)
@@ -186,7 +193,7 @@ class Deck:
                 datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[7] else None
             )
             card.last_review_date = (
-                datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[8] else None
+                datetime.datetime.strptime(row[8], "%Y-%m-%d").date() if row[8] else None
             )
             card.review_attempts = row[9]
             cards.append(card)
@@ -195,30 +202,23 @@ class Deck:
         return deck
 
 
-# # Create a deck
-# my_deck = Deck("Test deck")
-# my_deck.save()
-# # Deck has to be created before adding cards to it.
 # # Create cards
 # card1 = Card("What is the capital of France?", "Paris")
 # card2 = Card("What is your name?", "ZQ")
-# # Add cards to deck
-# my_deck.add_card(card1)
-# my_deck.add_card(card2)
+
 # # Save cards
 # card1.save()
 # card2.save()
 
+
+# # Create a deck
+# my_deck = Deck("Test deck")
+# my_deck.save()
+
+# my_deck.add_card(card1)
+# my_deck.add_card(card2)
+
 deck = Deck.load_deck(1)
-
-# Create cards
-card1 = Card("What is the capital of France?", "Paris")
-# card2 = Card("What is your name?", "ZQ")
-# Add cards to deck
-deck.add_card(card1)
-# deck.add_card(card2)
-
-card1.save()
-
+deck.review()
 
 # Check for duplicates
