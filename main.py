@@ -57,6 +57,20 @@ class Card:
         self.question = new_question
         self.answer = new_answer
 
+        # Update the card's information in the SQLite database
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
+        cursor.execute("UPDATE cards SET question = ?, answer = ? WHERE id = ?", (new_question, new_answer, self.card_id))
+        conn.commit()
+        conn.close()
+
+    def delete_card(self):
+        # Delete the card entry from the SQLite database
+        conn = sqlite3.connect("flashcards.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM cards WHERE id = ?", (self.card_id,))
+        conn.commit()
+        conn.close()
 
 class Deck:
     def __init__(self, name):
@@ -196,4 +210,15 @@ class Deck:
 # card2.save()
 
 deck = Deck.load_deck(1)
-deck.review()
+
+# Create cards
+card1 = Card("What is the capital of France?", "Paris")
+# card2 = Card("What is your name?", "ZQ")
+# Add cards to deck
+deck.add_card(card1)
+# deck.add_card(card2)
+
+card1.save()
+
+
+# Check for duplicates
