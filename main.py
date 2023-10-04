@@ -200,25 +200,3 @@ class Deck:
         conn.close()
         deck.cards = cards  # Store the loaded cards in the deck
         return deck
-
-
-# # Create cards
-# card1 = Card("What is the capital of France?", "Paris")
-# card2 = Card("What is your name?", "ZQ")
-
-# # Save cards
-# card1.save()
-# card2.save()
-
-
-# # Create a deck
-# my_deck = Deck("Test deck")
-# my_deck.save()
-
-# my_deck.add_card(card1)
-# my_deck.add_card(card2)
-
-deck = Deck.load_deck(1)
-deck.review()
-
-# Check for duplicates
