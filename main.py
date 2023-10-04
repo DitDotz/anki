@@ -2,6 +2,8 @@ import random
 import datetime
 import sqlite3
 
+# KhoTest made some edits to main py
+
 
 class Card:
     def __init__(
@@ -60,7 +62,10 @@ class Card:
         # Update the card's information in the SQLite database
         conn = sqlite3.connect("flashcards.db")
         cursor = conn.cursor()
-        cursor.execute("UPDATE cards SET question = ?, answer = ? WHERE id = ?", (new_question, new_answer, self.card_id))
+        cursor.execute(
+            "UPDATE cards SET question = ?, answer = ? WHERE id = ?",
+            (new_question, new_answer, self.card_id),
+        )
         conn.commit()
         conn.close()
 
@@ -71,6 +76,7 @@ class Card:
         cursor.execute("DELETE FROM cards WHERE id = ?", (self.card_id,))
         conn.commit()
         conn.close()
+
 
 class Deck:
     def __init__(self, name):
@@ -85,7 +91,9 @@ class Deck:
         # Update the card's deck_id in the SQLite database
         conn = sqlite3.connect("flashcards.db")
         cursor = conn.cursor()
-        cursor.execute("UPDATE cards SET deck_id = ? WHERE id = ?", (card.deck_id, card.card_id))
+        cursor.execute(
+            "UPDATE cards SET deck_id = ? WHERE id = ?", (card.deck_id, card.card_id)
+        )
         conn.commit()
         conn.close()
 
@@ -127,9 +135,7 @@ class Deck:
 
                 card.correct_attempts += 1
 
-                card.interval *= (
-                    card.ease_factor
-                )  # Set the appropriate interval
+                card.interval *= card.ease_factor  # Set the appropriate interval
 
                 card.current_incorrect_attempts = (
                     0  # Reset incorrect attempts for next review
@@ -139,10 +145,21 @@ class Deck:
                 card.due_date += datetime.timedelta(days=int(card.interval))
 
                 # Update SQL database
-                # Not working as intended - it is only taking the last card's attributes 
+                # Not working as intended - it is only taking the last card's attributes
                 conn = sqlite3.connect("flashcards.db")
                 cursor = conn.cursor()
-                cursor.execute("UPDATE cards SET ease_factor = ?, interval = ?, correct_attempts = ?, due_date = ?, last_review_date = ?, review_attempts = ? WHERE id = ?", (card.ease_factor, card.interval, card.correct_attempts, card.due_date, card.last_review_date, card.review_attempts, card.card_id))
+                cursor.execute(
+                    "UPDATE cards SET ease_factor = ?, interval = ?, correct_attempts = ?, due_date = ?, last_review_date = ?, review_attempts = ? WHERE id = ?",
+                    (
+                        card.ease_factor,
+                        card.interval,
+                        card.correct_attempts,
+                        card.due_date,
+                        card.last_review_date,
+                        card.review_attempts,
+                        card.card_id,
+                    ),
+                )
                 conn.commit()
                 conn.close()
 
@@ -190,10 +207,14 @@ class Deck:
             card.ease_factor = row[5]
             card.correct_attempts = row[6]
             card.due_date = (
-                datetime.datetime.strptime(row[7], "%Y-%m-%d").date() if row[7] else None
+                datetime.datetime.strptime(row[7], "%Y-%m-%d").date()
+                if row[7]
+                else None
             )
             card.last_review_date = (
-                datetime.datetime.strptime(row[8], "%Y-%m-%d").date() if row[8] else None
+                datetime.datetime.strptime(row[8], "%Y-%m-%d").date()
+                if row[8]
+                else None
             )
             card.review_attempts = row[9]
             cards.append(card)
