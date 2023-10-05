@@ -107,12 +107,26 @@ class Deck:
         for i, card in enumerate(self.cards, 1):
             print(f"Card {i} - Question: {card.question}, Answer: {card.answer}")
 
-    def review(self):
-        while self.cards:
-            random.shuffle(self.cards)  # Shuffle the cards for review
+    # def get_cards_to_review(self):
+    #     # Need to implement setting up today's cards for review
+    #     # A mix of new and old cards
+    #     return(cards_to_review)
 
+    def get_shuffled_cards(self):
+        shuffled_cards = random.shuffle(self.cards)  # Shuffle the cards for review
+        return(shuffled_cards)
+
+    def get_current_card(self):
+        current_card = self.cards[0]
+        return(current_card)
+
+    def review(self):
+        # self.get_cards_to_review()
+        self.get_shuffled_cards()
+
+        while self.cards:
             # Display current card
-            card = self.cards[0]
+            card = self.get_current_card()
             print(f"Question: {card.question}")
             user_response = input("Your answer: ").strip().lower()
 
@@ -200,3 +214,7 @@ class Deck:
         conn.close()
         deck.cards = cards  # Store the loaded cards in the deck
         return deck
+
+# current_deck = Deck.load_deck('Test deck')
+
+# current_deck.review()

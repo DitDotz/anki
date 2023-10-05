@@ -129,6 +129,8 @@ class ReviewWindow(QDialog): # Not working
     def __init__(self, deck, parent=None):
         super().__init__(parent)
         self.deck = deck
+        # self.deck.get_cards_to_review()
+        # self.deck.get_shuffled_cards()
         self.init_ui()
 
     def init_ui(self):
@@ -139,7 +141,7 @@ class ReviewWindow(QDialog): # Not working
         self.setWindowTitle("Review Deck")
         self.setGeometry(100, 100, 400, 200)
 
-        self.question_label = QLabel('Placeholder question') # placeholder string returned by deck.review method
+        self.question_label = QLabel(str(self.deck.get_current_card().question)) # placeholder string returned by deck.review method
         self.question_label.setAlignment(Qt.AlignCenter)
         self.answer_label = QLabel('Placeholder')# Necessary placeholder
         self.answer_label.setAlignment(Qt.AlignCenter)
@@ -185,7 +187,7 @@ class ReviewWindow(QDialog): # Not working
 
     def show_answer(self):
         # Show the answer and hide the "Show Answer" button
-        self.answer_label.setText('Placeholder') # placeholder string returned by deck.review method
+        self.answer_label.setText(str(self.deck.get_current_card().answer)) # placeholder string returned by deck.review method
         self.answer_label.show()
         self.show_answer_button.hide()
 
