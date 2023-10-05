@@ -163,13 +163,13 @@ class Deck:
         print(f"You have completed today's review")
 
     @classmethod
-    def load_deck(cls, deck_id):
+    def load_deck(cls, deck_name):
         conn = sqlite3.connect("flashcards.db")
         cursor = conn.cursor()
 
         # Execute the SQL query to select deck name
-        cursor.execute("SELECT name FROM decks WHERE id = ?", (deck_id,))
-        deck_name = cursor.fetchone()[0]
+        cursor.execute("SELECT id FROM decks WHERE name = ?", (deck_name,))
+        deck_id = cursor.fetchone()[0]
 
         # Create a new Deck instance with the fetched deck name
         deck = Deck(deck_name)
