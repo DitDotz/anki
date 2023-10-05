@@ -119,6 +119,10 @@ class Deck:
     def get_current_card(self):
         current_card = self.cards[0]
         return(current_card)
+    
+    def clear_current_card(self):
+        self.cards.pop(0)  # Remove the card from the review queue
+        return()
 
     def review(self):
         # self.get_cards_to_review()
@@ -160,8 +164,8 @@ class Deck:
                 conn.commit()
                 conn.close()
 
-                self.cards.pop(0)  # Remove the card from the review queue
-
+                self.clear_current_card()
+                
             else:
                 card.interval = 1  # Reset the interval for incorrect answers
                 card.ease_factor -= 0.1  # Decrease the ease factor for every wrong attempt in current loop

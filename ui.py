@@ -130,7 +130,7 @@ class ReviewWindow(QDialog): # Not working
         super().__init__(parent)
         self.deck = deck
         # self.deck.get_cards_to_review()
-        # self.deck.get_shuffled_cards()
+        self.deck.get_shuffled_cards()
         self.init_ui()
 
     def init_ui(self):
@@ -197,7 +197,6 @@ class ReviewWindow(QDialog): # Not working
         self.good_button.show()
         self.easy_button.show()
 
-
     # Have to change Deck.review implementation such that there is a dictionary
     # 'again': datetime
     # 'hard': datetime so on so forth
@@ -205,27 +204,31 @@ class ReviewWindow(QDialog): # Not working
     # Define actions for user response buttons
     def again(self):
         # Handle the "Again" response here
-        self.next_card()
+        self.show_next_card()
 
     def hard(self):
         # Handle the "Hard" response here
-        self.next_card()
+        self.show_next_card()
 
     def good(self):
         # Handle the "Good" response here
-        self.next_card()
+        self.show_next_card()
 
     def easy(self):
         # Handle the "Easy" response here
-        self.next_card()
+        self.show_next_card()
 
-    def next_card(self):
+    def show_next_card(self):
         # Move to the next card in the deck or close the window if there are no more cards
-        self.deck.next_card()
-        if self.deck.review():
-            self.question_label.setText(self.deck.review().question)
+        self.deck.clear_current_card()
+
+        if self.deck.cards:
+            self.question_label.setText(self.deck.get_current_card().question)
             self.answer_label.clear()
+            self.show_answer_button.setHidden(False)  # Unhide the "Show Answer" button
+
         else:
+            # if there are no more cards, close the review window while leaving the main menu open
             self.reject()
 
 
