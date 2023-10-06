@@ -204,6 +204,7 @@ class ReviewWindow(QDialog): # Not working
     # Define actions for user response buttons
     def again(self):
         # Handle the "Again" response here
+        # Implement the review alorithm
         self.show_next_card()
 
     def hard(self):
@@ -230,7 +231,6 @@ class ReviewWindow(QDialog): # Not working
         else:
             # if there are no more cards, close the review window while leaving the main menu open
             self.reject()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

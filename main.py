@@ -72,6 +72,21 @@ class Card:
         conn.commit()
         conn.close()
 
+    def update_interval(self, quality):
+        '''
+        Simplified SM2 algorithm.
+        Possible improvements
+        - 
+        '''
+        if quality == 'again':
+            self.interval = 1  # Reset interval
+        elif quality == 'hard':
+            self.interval = max(self.interval * 1.2, 1)  # Increase interval, but not less than 1 day
+        elif quality == 'good':
+            self.interval *= min(self.ease_factor,14)  # Increase interval based on ease factor
+        elif quality == 'easy':
+            self.interval *= min(self.ease_factor * 2,30)  # Increase interval even more for 'easy'
+
 class Deck:
     def __init__(self, name):
         self.name = name
@@ -79,6 +94,9 @@ class Deck:
         self.cards = []
 
     def add_card(self, card):
+        '''
+        Updates the card.deck_id attribute to be linked with current Deck instance
+        '''
         card.deck_id = self.id
         self.cards.append(card)
 
@@ -122,9 +140,48 @@ class Deck:
     
     def clear_current_card(self):
         self.cards.pop(0)  # Remove the card from the review queue
-        return()
+        return()        
+
+    def get_cards_for_review(self):
+        '''
+        Selects both difficult cards to re-review and new cards to review
+        Should be a option that the user can edit in the future
+        '''
+        max_new_cards = 10
+        max_mature_cards = 10
+
+        new_cards = []
+        mature_cards = []
+
+        for card in self.cards:
+            if card.interval == 1 and len(new_cards) < max_new_cards:
+                new_cards.append(card)
+
+            elif card.due_date == datetime.date.today() and len(mature_cards) < max_mature_cards:
+                mature_cards.append(card)
+
+            if len(new_cards) >= 10 and len(mature_cards) >= 10:
+                break
+        
+        cards_for_review = new_cards + mature_cards
+
+        return cards_for_review
+
+
+    def review2(self):
+        '''
+        Updated review to work with UI
+        '''
+        # Cards are shuffled automatically upon pressing ReviewWindow
+
 
     def review(self):
+        # For testing
+        # re-do this, get rid of the while loop, and print statements
+        # Read through the implementation of the logic below
+        # https://docs.ankiweb.net/deck-options.html
+
+
         # self.get_cards_to_review()
         self.get_shuffled_cards()
 
@@ -192,6 +249,8 @@ class Deck:
         # Create a new Deck instance with the fetched deck name
         deck = Deck(deck_name)
 
+        deck.id = deck_id
+
         # Execute the SQL query to select cards for the specified deck ID
         cursor.execute("SELECT * FROM cards WHERE deck_id = ?", (deck_id,))
 
@@ -219,6 +278,22 @@ class Deck:
         deck.cards = cards  # Store the loaded cards in the deck
         return deck
 
-# current_deck = Deck.load_deck('Test deck')
+#Area for unit testing
+# Need to check if get_cards_for_review is working
 
-# current_deck.review()
+
+# Create dummy cards to test get_cards_for_review
+# Not sure why deck_id is not updating properly
+
+# Reset flashcards.db as necessary using git restore
+
+deck = Deck.load_deck('Test deck')
+
+cards = []
+for i in range(3, 33):
+    question = f"Question {i}"
+    answer = f"Answer {i}"
+    card = Card(question, answer)
+    card.save()
+    deck.add_card(card)
+
