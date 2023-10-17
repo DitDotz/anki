@@ -287,13 +287,13 @@ class Deck:
 
 # Reset flashcards.db as necessary using git restore
 
-deck = Deck.load_deck('Test deck')
+# deck = Deck.load_deck('Test deck')
 
-cards = []
-for i in range(3, 33):
-    question = f"Question {i}"
-    answer = f"Answer {i}"
-    card = Card(question, answer)
-    card.save()
-    deck.add_card(card)
+# cards = []
+# for i in range(3, 33):
+#     question = f"Question {i}"
+#     answer = f"Answer {i}"
+#     card = Card(question, answer)
+#     card.save()
+#     deck.add_card(card)
 
