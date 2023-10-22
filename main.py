@@ -68,13 +68,10 @@ class Card:
         conn.commit()
         conn.close()
 
-    def delete_card(self):
+    @staticmethod
+    def delete(card_id):
         # Delete the card entry from the SQLite database
-        conn = sqlite3.connect("flashcards.db")
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM cards WHERE id = ?", (self.card_id,))
-        conn.commit()
-        conn.close()
+        db.delete_entry("cards", card_id)
 
     def update_interval(self, quality):
         '''
@@ -124,6 +121,10 @@ class Deck:
         self.id = cursor.lastrowid  # Get the ID of the inserted deck
         conn.commit()
         conn.close()
+    @staticmethod
+    def delete(deck_id):
+        # Delete the deck entry from the SQLite database
+        db.delete_entry("decks", deck_id)
 
     def list_cards(self):
         for i, card in enumerate(self.cards, 1):
@@ -281,6 +282,8 @@ class Deck:
         conn.close()
         deck.cards = cards  # Store the loaded cards in the deck
         return deck
+    
+Deck.delete_deck(deck_id=2)
 
 #Area for unit testing
 # Need to check if get_cards_for_review is working
