@@ -34,39 +34,27 @@ class Card:
         self.review_attempts = review_attempts  # Total review attempts
 
     def save(self):
-        conn = sqlite3.connect("flashcards.db")
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO cards (question, answer, deck_id, interval, ease_factor, correct_attempts, due_date, last_review_date, review_attempts)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                self.question,
-                self.answer,
-                self.deck_id,
-                self.interval,
-                self.ease_factor,
-                self.correct_attempts,
-                self.due_date,
-                self.last_review_date,
-                self.review_attempts,
-            ),
-        )
-        self.card_id = cursor.lastrowid  # Get the ID of the inserted deck
-        conn.commit()
-        conn.close()
+        card_attributes = {
+            'question': self.question,
+            'answer': self.answer,
+            'deck_id': self.deck_id,
+            'interval': self.interval,
+            'ease_factor': self.ease_factor,
+            'correct_attempts': self.correct_attempts,
+            'due_date': self.due_date,
+            'last_review_date': self.last_review_date,
+            'review_attempts': self.review_attempts
+        }
 
-    def edit_card(self, new_question, new_answer):  # Change to SQL implementation
+        db.insert_entry('cards', **card_attributes)
+        self.card_id = db.get_last_inserted_id()
+        
+    def edit(self, new_question, new_answer):  # Change to SQL implementation
         self.question = new_question
         self.answer = new_answer
 
-        # Update the card's information in the SQLite database
-        conn = sqlite3.connect("flashcards.db")
-        cursor = conn.cursor()
-        cursor.execute("UPDATE cards SET question = ?, answer = ? WHERE id = ?", (new_question, new_answer, self.card_id))
-        conn.commit()
-        conn.close()
+        # Update the card's information in the SQLite database using the Database class
+        db.update_entry("cards", self.card_id, question=new_question, answer=new_answer)
 
     @staticmethod
     def delete(card_id):
@@ -87,6 +75,8 @@ class Card:
             self.interval *= min(self.ease_factor,14)  # Increase interval based on ease factor
         elif quality == 'easy':
             self.interval *= min(self.ease_factor * 2,30)  # Increase interval even more for 'easy'
+        
+        db.update_entry("cards", self.card_id, interval=self.interval)
 
 class Deck:
     def __init__(self, name: str):
@@ -96,44 +86,28 @@ class Deck:
 
     def add_card(self, card):
         '''
-        Updates the card.deck_id attribute to be linked with current Deck instance
+        Add card to deck in current instance and database
         '''
         card.deck_id = self.id
         self.cards.append(card)
 
         # Update the card's deck_id in the SQLite database
-        conn = sqlite3.connect("flashcards.db")
-        cursor = conn.cursor()
-        cursor.execute("UPDATE cards SET deck_id = ? WHERE id = ?", (card.deck_id, card.card_id))
-        conn.commit()
-        conn.close()
-
-    def remove_card(self, card):
-        if card in self.cards:
-            self.cards.remove(card)
-        else:
-            print("Card not found in the deck.")
+        db.update_entry("cards", card.card_id, deck_id=self.id)
 
     def save(self):
-        conn = sqlite3.connect("flashcards.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO decks (name) VALUES (?)", (self.name,))
-        self.id = cursor.lastrowid  # Get the ID of the inserted deck
-        conn.commit()
-        conn.close()
+        deck_attributes = {'name': self.name}
+        self.id = db.insert_entry('decks', **deck_attributes)
+
     @staticmethod
     def delete(deck_id):
         # Delete the deck entry from the SQLite database
         db.delete_entry("decks", deck_id)
 
+    # For unit testing
+    # Actual implementation should involve listing a preview of question and answer in a scrollable window
     def list_cards(self):
         for i, card in enumerate(self.cards, 1):
             print(f"Card {i} - Question: {card.question}, Answer: {card.answer}")
-
-    # def get_cards_to_review(self):
-    #     # Need to implement setting up today's cards for review
-    #     # A mix of new and old cards
-    #     return(cards_to_review)
 
     def get_shuffled_cards(self):
         shuffled_cards = random.shuffle(self.cards)  # Shuffle the cards for review
@@ -147,13 +121,11 @@ class Deck:
         self.cards.pop(0)  # Remove the card from the review queue
         return()        
 
-    def get_cards_for_review(self):
+    def get_cards_for_review(self, max_new_cards = 10 ,max_mature_cards = 10):
         '''
         Selects both difficult cards to re-review and new cards to review
         Should be a option that the user can edit in the future
         '''
-        max_new_cards = 10
-        max_mature_cards = 10
 
         new_cards = []
         mature_cards = []
@@ -180,12 +152,11 @@ class Deck:
         # Cards are shuffled automatically upon pressing ReviewWindow
 
 
+    # For unit testing
     def review(self):
-        # For testing
         # re-do this, get rid of the while loop, and print statements
         # Read through the implementation of the logic below
         # https://docs.ankiweb.net/deck-options.html
-
 
         # self.get_cards_to_review()
         self.get_shuffled_cards()
@@ -219,7 +190,6 @@ class Deck:
                 card.due_date += datetime.timedelta(days=int(card.interval))
 
                 # Update SQL database
-                # Not working as intended - it is only taking the last card's attributes 
                 conn = sqlite3.connect("flashcards.db")
                 cursor = conn.cursor()
                 cursor.execute("UPDATE cards SET ease_factor = ?, interval = ?, correct_attempts = ?, due_date = ?, last_review_date = ?, review_attempts = ? WHERE id = ?", (card.ease_factor, card.interval, card.correct_attempts, card.due_date, card.last_review_date, card.review_attempts, card.card_id))
