@@ -1,22 +1,26 @@
 import random
 import datetime
 import sqlite3
+import db_ops
+from typing import List
 
+db = db_ops.Database()
 
 class Card:
     def __init__(
         self,
-        question,
-        answer,
-        card_id=None,
-        deck_id=None,
-        interval=1,
-        ease_factor=2.5,
-        correct_attempts=0,
-        due_date=None,
-        last_review_date=None,
-        review_attempts=0,
+        question: str,
+        answer: str,
+        card_id: int = None,
+        deck_id: int = None,
+        interval: float = 1.0,
+        ease_factor: float = 2.5,
+        correct_attempts: int = 0,
+        due_date: datetime.date = None,
+        last_review_date: datetime.date = None,
+        review_attempts: int = 0,
     ):
+
         self.card_id = card_id  # Instantiate after saving
         self.deck_id = deck_id  # Instantiate after saving
         self.question = question
@@ -88,10 +92,10 @@ class Card:
             self.interval *= min(self.ease_factor * 2,30)  # Increase interval even more for 'easy'
 
 class Deck:
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
-        self.id = None  # The deck ID will be set after saving
-        self.cards = []
+        self.id:int = None  # The deck ID will be set after saving
+        self.cards: List[Card] = []
 
     def add_card(self, card):
         '''
